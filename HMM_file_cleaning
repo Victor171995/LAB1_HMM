@@ -1,0 +1,27 @@
+
+######
+#Process files obtained from PDB query and RUPEE structure similarity search
+#####
+
+awk -F "," '{print $(NF-1),$5,$3,$4}' ~/LAB1_report/test_commands/rcsb_pdb_custom_report_20210427024225.csv | tr -d '"' |tail -n +2 > clean_pdb.txt   #Extract collumns 3, 4, 5 and last from the downloaded PDB query. Write out to "clean_pdb.txt" file
+
+awk '{if ($4>=40 && $4<=80) print $0}' clean_pdb.txt >clean_pdb_len40_80.txt    #Filter for sequences between length 40 and 80, as indicated in the fourth collumn. Write out to "clean_pdb_len40_80.txt" file.
+
+awk -F "," '{print toupper($2),$3,$4}' data.csv |tail -n +2 > 3tgi_aln.list     #Take only columns 2 converting to uppercase, 3 and 4 from the structures obtained from the RUPEE structure similarity search (data.csv) and write out to 3tgi_aln.list file. This contains the identifier, rmsd and TM-score
+
+
+#####
+#Compare content in the PDB query file and RUPEE structure similarity search to guarantee correct sequence selection
+#####
+
+awk '{print $1$2}' clean_pdb_len40_80.txt |sort -u > list1  #Take columns one and two (PDB entry and chain) from the PDB query file, sort them and write out to "list1"
+
+awk '{print $1}' 3tgi_aln.list |sort -u > list2  #Take column one (PDB entry and chain) from the RUPEE structure search file, sort them and write out to "list2"
+
+comm -12 <(sort list1) <(sort list2) > comm_list.txt  #Takeo only overlapping entries with chains from both the PDB query and RUPEE structure search and write out to file.
+
+#####
+#Generate fasta file
+#####
+
+python3 compare.py clean_pdb.seq comm_list.txt | awk ‘{print ‘>’ $1;print$2}’ > comm_seq.fasta  #Generate fasta file from the PDB query file and the overlapping entries in the PDB and RUPEE queries using the compare.py python3 script. 
