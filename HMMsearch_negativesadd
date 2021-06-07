@@ -1,0 +1,12 @@
+hmmsearch -Z 1 --noali --max -o set_neg1.out 2.0_noredund.hmm set_neg1.fasta   #Command used to run hmmsearch
+
+grep -n ">>" set_neg1.hmmout |less  #Output the number of the line which first starts with ">>" in the hmmsearch output from the negative sets. This is where the E-value is so high that it is not reported in the hmmsearch output.
+
+head -n $obtained_line_number set_neg1.hmmout |tail -n +19|awk '{print $NF,$4,0}' > set_neg1.res  #Take only from line 19 up until the line number obtained above. This is the part of the file with identifier and e-value information. Write out to file only taking the entry identifier, domain e-value and 0 because we are dealing with true negatives. This is repeated for the second negative set.
+
+comm -23 <(sort set_neg1.ids) <(awk '{print $1}' set_neg1.res |sort) |awk '{print $1, 10.0, 0}' > set_neg1.add   #Write out to "set_neg1.add" file all structures not included in the e-value report from hmmsearch report. Include the identifier, 10.0 which is the e-value threshold for the hmmsearch report and 0 because these are true negatives.
+
+tail -n +19 set_pos1.hmmout |head -n 178|awk '{print $NF,$4,1}' > set_pos1.res   #Take only lines from 19 to 178 in the positive set. Take last column (identifier), fourth column (domain e-value) and add column with 1 because we are dealing with true positives.
+
+
+cat set_neg1.res set_neg1.add set_pos1.res > set_all1.res   #Concatenate the entire negative set and the entire positive set into one
