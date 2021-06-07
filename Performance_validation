@@ -1,0 +1,41 @@
+#!/usr/bin/python
+import sys, math
+
+def get_preds(filename, sp=-2, rc=-1):
+        pred_list=[]
+        f=open(filename)
+        for line in f:
+                v = line.rstrip().split()
+                pred_list.append([v[0], v[sp], v[rc]])
+        return pred_list
+
+
+def get_cm(data,th):
+  # CM=[[TP,FP],[FN,TN]]
+  # 0 = Negatives 1=Positives
+  cm=[[0.0,0.0],[0.0,0.0]]
+  for i in data:
+    if i[0]<th and i[1]==1:
+      cm[0][0]=cm[0][0]+1
+    if i[0]>=th and i[1]==1:
+      cm[1][0]=cm[1][0]+1
+    if i[0]<th and i[1]==0:
+      cm[0][1]=cm[0][1]+1
+    if i[0]>th and i[1]==0:
+      cm[1][1]=cm[1][1]+1
+  return cm
+
+def calculate_performance(cm)
+        n = float(cm[0][0]+cm[1][1]+cm[0][1]+cm[1][0])
+        d = np.sqrt((cm[0][0]+cm[0][1])*(cm[0][0]+cm[1][0])*(cm[1][1]+cm[1][0])*(cm[1][1]+cm[0][1]))
+        mcc = (cm[0][0]*cm[1][1]-cm[0][1]*cm[1][0])/d
+        acc = (cm[0][0]+cm[1][1])/n
+        print('ACC:',acc,'MCC:',mcc)
+
+
+if __name__ == "__main__":
+        predfile=sys.argv[1]
+        th=float(sys.argv[2])
+        pred_list=get_preds(predfile)
+        cm=get_cm(pred_list, th)
+        calculate_performance(cm)
