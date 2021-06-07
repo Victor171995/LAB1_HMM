@@ -1,0 +1,5 @@
+pdbfile=$1
+chain=$2
+
+awk -v c=$chain '{if ((substr($0,1,4)=="ATOM" || substr($0,1,3)=="TER") && (substr($0,22,1)==c)) print $0}' $pdbfile   #take lines starting with ATOM or TER and with desired chain given as variable c
+
