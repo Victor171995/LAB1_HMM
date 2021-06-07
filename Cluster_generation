@@ -1,0 +1,7 @@
+blastclust -i comm_seq.fasta -o comm_seq.clust -S 95 -L 0.9   #Generate clusters from the fasta file. Cluster criteria are a 95% sequence identity and 90% coverage (alternatively change sequence identity and coverage values)
+
+head -n 1 comm_seq.clust | awk '{split($0,a," "); for (i=1;i<=length(a);i++) {print substr(a[i],1,4)}}' | sort -u >cluster_1  #Extract only PDB identifiers from the blastclust output  and sort them. Run iterateviley on all lines of the blastclust output to seperate clusters.
+
+python3 compare.py resolu.idx cluster_1 |sort -nk 3  #Using the compare.py python script, add the resolutions to their respective entry identifiers and sort them based on their resolution
+
+for i in `cat list_pdb.txt`; do wget https://files.rcsb.org/view/$i.pdb; done   #From a list of selected cluster representatives download their PDB files
