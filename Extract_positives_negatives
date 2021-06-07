@@ -1,0 +1,19 @@
+cat positives.fasta |awk '{if (substr($0,1,1)==">") {split($0,a,"|");print a[2]}}' > positives_ids.txt  #Extract only identifiers from the downloaded positives fasta file and write out
+
+zcat negatives.fasta |awk '{if (substr($0,1,1)==">") {split($0,a,"|");print a[2]}}' > negatives_ids.txt  #Extract only identifiers from the downloaded negatives fasta.gz compressed file and write out
+
+sort -R positives_ids.txt > positives_randomids.txt  #Randomly sort the identifiers in the previously created positive set file
+
+sort -R negatives_ids.txt > negatives_randomids.txt   #Randomly sort the identifiers in the previously created negative set file
+
+head -n 178 positives_randomids.txt > set_pos1.ids    #Take the first 178 identifiers from the randomly sorted list file of positives. This is set 1.
+
+tail -n +179 positives_randomids.txt > set_pos2.ids   #Take the rest of the identifiers from the randomly sorted list file of positives. This is set 2.
+
+head -n +277521 negatives_randomids.txt > set_neg1.ids  #Take the first 277522 identifiers from the randomly sorted life file of negatives. This is set 1.
+
+tail -n +277522 negatives_randomids.txt > set_neg2.ids   #Take the rest of the identifiers from the randomly sorted life file of negatives. This is set 2.
+
+python3 selec-seqs.py set_neg1.ids positives.fasta > set_pos1.fasta   #Using the selec-seqs.py python script, the set 1 of positives and the downloaded fasta file, write out to "set_pos1.fasta" which containts the created set identifiers with their respective sequences in fasta format
+
+python3 selec-seqs.py set_neg1.ids <(zcat negatives.fasta.gz) > set_neg1.fasta   #Using the selec-seqs.py python script, the set 1 of negatives and the downloaded fasta file, write out to "set_neg1.fasta" which containts the created set identifiers with their respective sequences in fasta format
